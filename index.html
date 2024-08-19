@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chhattisgarh Quiz</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+  <!-- Inline CSS -->
+  <style>
+    body {
+      font-size: larger;
+      background-color: rgb(228, 228, 228);
+    }
+    .top-bar {
+      display: block;
+      max-width: 100%;
+      background: radial-gradient(circle, rgba(182, 160, 240, 1) 0%, rgba(118, 208, 246, 1) 100%, rgba(63, 250, 251, 1) 100%);
+      padding: 15px;
+      margin: 0;
+    }
+    .top-left-bar {
+      margin-left: 50px;
+    }
+    .top-right-bar {
+      float: right;
+      text-align: right;
+      margin-right: 50px;
+    }
+    .answerBtn {
+      margin-top: 10px;
+      background-color: #5e6ce8;
+      border-color: #3B4BE3;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: medium;
+    }
+    .answerBtn:hover {
+      background-color: #3B4BE3;
+    }
+    .answerPara {
+      margin-top: 14px;
+      font-size: medium;
+      color: #333;
+    }
+    #start,
+    #high-scores-btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: medium;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #high-scores-btn {
+      display: none;
+    }
+    .name-input-row {
+      display: none;
+    }
+    .even-row {
+      background-color: #FEE7D7;
+    }
+    .odd-row {
+      background-color: #FEF2EC;
+    }
+    #submit-score {
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: #5e6ce8;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: medium;
+    }
+    #answer-bar {
+      visibility: hidden;
+    }
+    #ending-screen {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    #ending-screen p {
+      font-size: 1.5em;
+      color: #e74c3c;
+    }
+    #leaderboard {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    #leaderboard-list {
+      text-align: center;
+    }
+    .delete-btn {
+      color: red;
+      cursor: pointer;
+      font-size: 1.1em;
+    }
+    .clear-all-btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #e74c3c;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: medium;
+    }
+    .clear-all-btn:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <header class='top-bar'>
+    <a href="#" class="top-left-bar" id="top-left-high-scores">High Scores</a>
+    <span id='timer' class="top-right-bar">Timer</span>
+  </header>
+
+  <hr>
+
+  <main class="container">
+    <header class='row'>
+      <h1 class='col-md-12' id='quiz-title'>Chhattisgarh Quiz</h1>
+    </header>
+
+    <section class="row name-input-row">
+      <div class="col-md-12">
+        <form id="name-input-form" method="POST">
+          <label for="name-text">Submit Your Score:</label>
+          <input type="text" placeholder="Your name here" id="name-text">
+        </form>
+        <button type="button" class="btn btn-success" id="submit-score">Submit</button>
+      </div>
+    </section>
+
+    <section class='container' id='quiz'></section>
+
+    <button type="button" class="btn btn-primary" id='start'>Start</button>
+    <button type="button" class="btn btn-info" id='high-scores-btn'>High Scores</button>
+
+    <hr id='answer-bar'>
+    <p id="right-wrong"></p>
+
+    <!-- Ending Screen -->
+    <div id="ending-screen">
+      <p>Better luck next time!</p>
+    </div>
+
+    <!-- Leaderboard Screen -->
+    <div id="leaderboard">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+      <button type="button" class="clear-all-btn" id="clear-scores-btn">Clear All</button>
+    </div>
+  </main>
+
+  <!-- Inline JavaScript -->
+  <script>
+    "use strict";
+
+    const questionArray = [
+      { "question": "What is the capital of Chhattisgarh?", "answers": ["Raipur", "Bilaspur", "Durg", "Korba"], "correctAnswer": 0 },
+      { "question": "Which river flows through Chhattisgarh?", "answers": ["Ganga", "Narmada", "Mahanadi", "Godavari"], "correctAnswer": 2 },
+      { "question": "Which is a famous festival celebrated in Chhattisgarh?", "answers": ["Diwali", "Holi", "Dussehra", "Bastar Dussehra"], "correctAnswer": 3 },
+      { "question": "Which mineral is abundantly found in Chhattisgarh?", "answers": ["Gold", "Iron Ore", "Bauxite", "Diamond"], "correctAnswer": 1 },
+      { "question": "Which of these is a famous tribal dance of Chhattisgarh?", "answers": ["Bihu", "Ghoomar", "Panthi", "Garba"], "correctAnswer": 2 }
+    ];
+
+    const startBtn = document.getElementById('start');
+    const submitScoreBtn = document.getElementById("submit-score");
+    const highScoresBtn = document.getElementById('high-scores-btn');
+    const leaderboardSection = document.getElementById('leaderboard');
+    const leaderboardList = document.getElementById('leaderboard-list');
+    const clearScoresBtn = document.getElementById('clear-scores-btn');
+    const nameInputRow = document.querySelector('.name-input-row');
+    const nameInput = document.getElementById('name-text');
+    const timerDisplay = document.getElementById('timer');
+    const endingScreen = document.getElementById('ending-screen');
+    const quizSection = document.getElementById('quiz');
+    const rightWrongDisplay = document.getElementById('right-wrong');
+    const answerBar = document.getElementById('answer-bar');
+    let startTime;
+    let timerInterval;
+    let highestScores = [];
+    const TOTALTIMEGIVEN = 100;
+    const PENALTYTIME = 20;
+    const SCORELISTLENGTH = 10;
+    const MAXNAMELENGTH = 50;
+    let timeOver = true;
+    let newTime = TOTALTIMEGIVEN;
+    let questionNumber = 0;
+    let highScore;
+
+    function initialQuiz() {
+      quizSection.innerHTML = "Answer all the questions within the time limit! Incorrect answers will subtract " + PENALTYTIME + " seconds from the time.";
+      startBtn.style.display = "block";
+
+      let storedHighScoresArray = JSON.parse(localStorage.getItem("highestScoresArray"));
+      if (storedHighScoresArray !== null) {
+        highestScores = storedHighScoresArray;
+      }
+    }
+
+    initialQuiz();
+
+    startBtn.addEventListener("click", function () {
+      highScoresBtn.style.display = "none";
+      leaderboardSection.style.display = "none";
+      newTime = TOTALTIMEGIVEN;
+      timeOver = false;
+      questionNumber = 0;
+      startBtn.style.display = "none";
+      quizSection.textContent = "";
+      timerDisplay.textContent = "Time left: " + newTime + " seconds";
+      decrement();
+      runQuiz();
+    });
+
+    function runQuiz() {
+      if (timeOver || questionNumber >= questionArray.length) {
+        youGotAHighScore();
+        return;
+      }
+
+      quizSection.textContent = "";
+      createLayout(questionArray[questionNumber]);
+      questionNumber++;
+    }
+
+    function createLayout(questionObj) {
+      const questionTitle = document.createElement('h2');
+      questionTitle.textContent = questionObj.question;
+      quizSection.appendChild(questionTitle);
+
+      questionObj.answers.forEach((answer, index) => {
+        const answerButton = document.createElement('button');
+        answerButton.className = 'answerBtn';
+        answerButton.textContent = answer;
+        answerButton.addEventListener('click', function () {
+          checkAnswer(index);
+        });
+        quizSection.appendChild(answerButton);
+      });
+    }
+
+    function checkAnswer(selectedAnswer) {
+      if (selectedAnswer === questionArray[questionNumber - 1].correctAnswer) {
+        rightWrongDisplay.textContent = "Correct!";
+      } else {
+        rightWrongDisplay.textContent = "Wrong!";
+        newTime -= PENALTYTIME;
+        if (newTime < 0) newTime = 0;
+      }
+      runQuiz();
+    }
+
+    function decrement() {
+      startTime = Date.now();
+      timerInterval = setInterval(function () {
+        if (timeOver) {
+          clearInterval(timerInterval);
+          return;
+        }
+        let currentTime = Math.round((TOTALTIMEGIVEN - (Date.now() - startTime) / 1000));
+        newTime = currentTime;
+        if (currentTime <= 0) {
+          timeOver = true;
+          newTime = 0;
+          timerDisplay.textContent = "Time's up!";
+          clearInterval(timerInterval);
+          youGotAHighScore();
+        } else {
+          timerDisplay.textContent = "Time left: " + newTime + " seconds";
+        }
+      }, 1000);
+    }
+
+    function youGotAHighScore() {
+      endingScreen.style.display = "block";
+      nameInputRow.style.display = "block";
+      highScoresBtn.style.display = "block";
+      quizSection.innerHTML = "";
+      answerBar.style.visibility = "hidden";
+      if (newTime > 0) {
+        rightWrongDisplay.textContent = "Congratulations!";
+      }
+    }
+
+    function checkHighScore() {
+      let name = nameInput.value.trim();
+      if (name === "") {
+        alert("Please enter your name!");
+        return;
+      }
+      if (name.length > MAXNAMELENGTH) {
+        alert("Name is too long!");
+        return;
+      }
+      nameInputRow.style.display = "none";
+      let playerScore = { name: name, score: newTime };
+      highestScores.push(playerScore);
+      highestScores.sort((a, b) => b.score - a.score);
+      highestScores = highestScores.slice(0, SCORELISTLENGTH);
+      localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+      displayHighScores();
+    }
+
+    function displayHighScores() {
+      leaderboardSection.style.display = "block";
+      let listHTML = '<ul>';
+      highestScores.forEach((scoreObj, index) => {
+        listHTML += `<li class="${index % 2 === 0 ? 'even-row' : 'odd-row'}">${scoreObj.name} - ${scoreObj.score} seconds <span class="delete-btn" data-index="${index}">&#10006;</span></li>`;
+      });
+      listHTML += '</ul>';
+      leaderboardList.innerHTML = listHTML;
+    }
+
+    clearScoresBtn.addEventListener('click', function () {
+      if (confirm("Are you sure you want to clear all scores?")) {
+        highestScores = [];
+        localStorage.removeItem("highestScoresArray");
+        displayHighScores();
+      }
+    });
+
+    leaderboardList.addEventListener('click', function (event) {
+      if (event.target.classList.contains('delete-btn')) {
+        let index = event.target.getAttribute('data-index');
+        highestScores.splice(index, 1);
+        localStorage.setItem("highestScoresArray", JSON.stringify(highestScores));
+        displayHighScores();
+      }
+    });
+
+    submitScoreBtn.addEventListener('click', checkHighScore);
+    highScoresBtn.addEventListener('click', displayHighScores);
+  </script>
+
+</body>
+</html>
